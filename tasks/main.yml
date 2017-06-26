@@ -2,6 +2,7 @@
 # tasks file for tls-cert
 
 - include: yum.yml
+  when: (((ansible_distribution == "CentOS") or (ansible_distribution == "RedHat")) and (ansible_distribution_major_version == "7"))
   become: true
   tags:
   - tls_cert_yum
