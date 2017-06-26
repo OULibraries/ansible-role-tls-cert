@@ -28,7 +28,7 @@ TBD
 License
 -------
 
-MIT
+[MIT](LICENSE)
 
 Author Information
 ------------------
