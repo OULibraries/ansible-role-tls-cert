@@ -2,7 +2,7 @@
 
 - name: TLS cert directory exists
   file:
-    path: "{{ tls_cert_path }}/{{ item.name }}"
+    path: "{{ tls_cert_path }}/{{ item.common_name }}"
     state: directory
   with_items: "{{ tls_certificates }}"
 
@@ -10,10 +10,10 @@
   shell: >
      TLS_CERT_CN="{{ item.common_name }}" TLS_CERT_SAN="{{ item.alt_names }}"
      openssl req -config "{{ tls_cert_path }}"/openssl.cnf -new -newkey rsa -nodes
-     -keyout "{{ tls_cert_path }}"/"{{ item.name }}"/privkey.pem
-     -out "{{ tls_cert_path }}"/"{{ item.name }}"/request.csr
+     -keyout "{{ tls_cert_path }}"/"{{ item.common_name }}"/privkey.pem
+     -out "{{ tls_cert_path }}"/"{{ item.common_name }}"/request.csr
   args:
-    creates: "{{ tls_cert_path }}/{{ item.name }}/privkey.pem"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
   with_items: "{{ tls_certificates }}"
   environment:
     TLS_CERT_C: "{{ tls_cert_country }}"

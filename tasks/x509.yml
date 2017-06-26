@@ -8,4 +8,4 @@
   args:
     creates: "{{ tls_cert_path }}/{{ item.name }}/fullchain.pem"
   with_items: "{{ tls_certificates }}"
-  when: "{{ item.type }}" == self-signed
+  when: "{{ item.type }} == self-signed"
