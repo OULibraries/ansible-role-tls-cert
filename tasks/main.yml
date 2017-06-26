@@ -14,3 +14,7 @@
 - include: req.yml
   tags:
   - tls_cert_req
+
+- include: x509.yml
+  tags:
+  - tls_cert_x509
