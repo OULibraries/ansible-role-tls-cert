@@ -8,10 +8,9 @@
 
 - name: TLS key and CSR exist.
   command: >
-     export TLS_CERT_CN="{{ item.common_name }}";
-     export TLS_CERT_SAN="{{ item.alt_names }}";
-     openssl -config ~/openssl.cnf
-     req -new -newkey -nodes
+     TLS_CERT_CN="{{ item.common_name }}";
+     TLS_CERT_SAN="{{ item.alt_names }}";
+     openssl req -config ~/openssl.cnf -new -newkey -nodes
      -keyout "{{ tls_cert_path }}"/"{{ item.name }}"/privkey.pem
      -out "{{ tls_cert_path }}"/"{{ item.name }}"/request.csr
   args:
