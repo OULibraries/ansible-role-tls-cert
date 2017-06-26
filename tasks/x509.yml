@@ -2,10 +2,11 @@
 
 - name: Self-signed TLS key exists.
   shell: >
-     openssl x509 -config "{{ tls_cert_path }}"/openssl.cnf
-     -signkey "{{ tls_cert_path }}"/"{{ item.name }}"/privkey.pem
-     -out "{{ tls_cert_path }}"/"{{ item.name }}"/fullchain.pem
+     openssl x509 -req
+     -in "{{ tls_cert_path }}"/"{{ item.common_name }}"/request.csr
+     -signkey "{{ tls_cert_path }}"/"{{ item.common_name }}"/privkey.pem
+     -out "{{ tls_cert_path }}"/"{{ item.common_name }}"/fullchain.pem
   args:
-    creates: "{{ tls_cert_path }}/{{ item.name }}/fullchain.pem"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
   with_items: "{{ tls_certificates }}"
-  when: "{{ item.type }} == self-signed"
+  when: item.type == "self-signed"
