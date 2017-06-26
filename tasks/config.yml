@@ -1,0 +1,6 @@
+---
+
+- name: copy openssl.cnf
+  copy:
+    src: openssl.cnf
+    dest: /home/{{ ansible_user_id }}/openssl.cnf

@@ -1,2 +1,15 @@
 ---
 # tasks file for tls-cert
+
+- include: yum.yml
+  become: true
+  tags:
+  - tls_cert_yum
+
+- include: config.yml
+  tags:
+  - tls_cert_config
+
+- include: req.yml
+  tags:
+  - tls_cert_req

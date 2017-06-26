@@ -1,0 +1,13 @@
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+C = ${ENV::TLS_CERT_C}
+ST = ${ENV::TLC_CERT_ST}
+L = ${ENV::TLS_CERT_L}
+O = ${ENV::TLS_CERT_O}
+OU = ${ENV::TLS_CERT_OU}
+CN = ${ENV::TLS_CERT_CN}
+[v3_req]
+subjectAltName = ${ENV::TLS_CERT_SAN}

@@ -1,0 +1,31 @@
+---
+
+- name: TLS cert directory exists
+  file:
+    path: "{{ tls_cert_path }}/{{ item.name }}"
+    state: directory
+  with_items: tls_certificates
+
+- name: TLS key directory exists
+  file:
+    path: "{{ tls_key_path }}/{{ item.name }}"
+    state: directory
+  with_items: tls_certificates
+
+- name: TLS key and CSR exist.
+  command: >
+     export TLS_CERT_CN="{{ item.common_name }}";
+     export TLS_CERT_SAN="{{ item.alt_names }}";
+     openssl -config ~/openssl.cnf
+     req -new -newkey -nodes
+     -keyout "{{ tls_key_path }}"/"{{ item.name }}"/privkey.pem 
+     -out "{{ tls_cert_path }}"/"{{ item.name }}"/request.csr
+  args:
+    creates: "{{ tls_key_path }}/{{ item.name }}/privkey.pem"
+  with_items: tls_certificates
+  environment:
+    TLS_CERT_C: {{ tls_cert_country }}
+    TLC_CERT_ST: {{ tls_cert_state }}
+    TLS_CERT_L: {{ tls_cert_locality }}
+    TLS_CERT_O: {{ tls_cert_organization }}
+    TLS_CERT_OU: {{ tls_cert_department }}
