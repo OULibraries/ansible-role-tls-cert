@@ -36,7 +36,7 @@
   when: item.type == "acme"
 
 - name: Push challenge to web server
-  syncronize:
+  synchronize:
     mode: push
     src: "{{ tls_cert_path }}/{{ item.common_name }}/acme-challenge/"
     dest: "rsync://{{ item.dest_host }}/{{ item.dest_acme_challenge_dir }}"
