@@ -4,7 +4,7 @@
   command: >
     openssl genrsa -out "{{ tls_cert_path }}"/acme_account_privkey.pem
   args:
-      creates: "{{ tls_cert_path }}/acme_account_privkey.pem"
+    creates: "{{ tls_cert_path }}/acme_account_privkey.pem"
 
 - name: Local ACME challenge directory exists
   file:
@@ -29,10 +29,9 @@
     dest: "{{ tls_cert_acme_challenge_local_file_name }}"
     content: "{{ tls_cert_acme_challenge_file_content }}"
     mode: 0644
-  when: tls_cert_acme_challenge|changed 
   vars:
-      challenge_local_file_name: "{{ tls_cert_path }}/{{ item.common_name }}/acme-challenge/{{ tls_cert_acme_challenge['challenge_data'][domain]['http-01']['resource'] }}"
-      challenge_file_content: "{{ tls_cert_acme_challenge['challenge_data'][domain]['http-01']['resource_value'] }}"
+    challenge_local_file_name: "{{ tls_cert_path }}/{{ item.common_name }}/acme-challenge/{{ tls_cert_acme_challenge['challenge_data'][domain]['http-01']['resource'] }}"
+    challenge_file_content: "{{ tls_cert_acme_challenge['challenge_data'][domain]['http-01']['resource_value'] }}"
   with_items: "{{ tls_certificates }}"
   when: item.type == "acme"
 
