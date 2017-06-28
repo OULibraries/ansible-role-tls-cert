@@ -18,3 +18,7 @@
 - include: x509.yml
   tags:
   - tls_cert_x509
+
+- include: acme.yml
+  tags:
+  - tls_cert_acme

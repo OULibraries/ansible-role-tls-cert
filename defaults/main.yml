@@ -1,2 +1,5 @@
 ---
 # defaults file for tls-cert
+
+# Entry point URL to access CA server API. Defaults to lets encrypt staging.
+acme_directory: 'https://acme-staging.api.letsencrypt.org/directory'
