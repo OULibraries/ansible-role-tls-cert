@@ -29,7 +29,7 @@
     msg: >
       "{{ item['challenge_data'][item.item.common_name]['http-01']['resource_value'] }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
 
 - name: Create challenge file
   copy:
@@ -37,13 +37,13 @@
     content: "{{ item['challenge_data'][item.item.common_name]['http-01']['resource_value'] }}"
     mode: 0644
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
 
 - name: Push challenge to web server
   local_action: >
     command rsync {{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }} {{ item.item.dest_host }}:{{ item.item.dest_acme_challenge_dir }}/.well-known/acme-challenge
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
 
 - name: Respond to challenge and fetch certs
   letsencrypt:
@@ -52,7 +52,7 @@
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ item.item.common_name }}/request.csr"
     dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/fullchain.pem"
-    data: "{{ item }}"
+    data: "{{ item['challenge_data'][item.item.common_name] } }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme" and item|changed
 
@@ -61,10 +61,10 @@
     path: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
     state: absent
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
 
 - name: Cleanup remote challenge file
   local_action: >
     command ssh {{ item.item.dest_host }} rm {{ item.item.dest_acme_challenge_dir }}/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
