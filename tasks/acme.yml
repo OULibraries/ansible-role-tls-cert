@@ -16,6 +16,7 @@
 
 - name: Request challenge
   letsencrypt:
+    remaining_days: "{{ tls_cert_acme_remaining_days }}"
     acme_directory: "{{ tls_cert_acme_directory }}"
     account_email: "{{ tls_cert_acme_account_email }}"
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
@@ -52,7 +53,7 @@
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ item.item.common_name }}/request.csr"
     dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/fullchain.pem"
-    data: "{{ item['challenge_data'] }}"
+    data: "{{ item }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme" and item|changed
 

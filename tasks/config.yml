@@ -1,5 +1,11 @@
 ---
 
+- name: TLS cert directory exists
+  file:
+    path: "{{ tls_cert_path }}"
+    state: directory
+    recurse: yes
+
 - name: copy openssl.cnf
   copy:
     src: openssl.cnf

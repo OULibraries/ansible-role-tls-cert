@@ -3,3 +3,9 @@
 
 # Entry point URL to access CA server API. Defaults to lets encrypt staging.
 tls_cert_acme_directory: 'https://acme-staging.api.letsencrypt.org/directory'
+
+# Location on control machine to place key material
+tls_cert_path: "{{ role_path }}/../../tls_certs"
+
+# How many days away from expiration to allow for renewal of acme certs
+tls_cert_acme_remaining_days: 30
