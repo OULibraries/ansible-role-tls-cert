@@ -17,7 +17,7 @@
 - name: Request challenge
   letsencrypt:
     remaining_days: "{{ tls_cert_acme_remaining_days }}"
-    acme_directory: "{{ tls_cert_acme_directory }}"
+    acme_directory: "{{ item.acme_dir | default(tls_cert_acme_directory) }}"
     account_email: "{{ tls_cert_acme_account_email }}"
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ item.common_name }}/request.csr"
