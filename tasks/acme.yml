@@ -6,6 +6,15 @@
   args:
     creates: "{{ tls_cert_path }}/acme_account_privkey.*"
 
+- name: Unencrypted ACME account key exists.
+  command: >
+    ansible-vault decrypt
+    {{ tls_cert_path }}/acme_account_privkey.vault.yml
+    --output={{ tls_cert_path }}/acme_account_privkey.pem
+  args:
+    chdir: "{{ tls_cert_path}}/.."
+    creates: "{{ tls_cert_path }}/acme_account_privkey.pem"
+
 - name: Local ACME challenge directory exists
   file:
     path: "{{ tls_cert_path }}/{{ item.common_name }}/acme/.well-known/acme-challenge"
@@ -69,3 +78,17 @@
     command ssh {{ item.item.dest_host }} rm {{ item.item.dest_acme_challenge_dir }}/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme" and item|changed
+
+- name: Encrypted ACME account key exists.
+  command: >
+    ansible-vault encrypt
+    {{ tls_cert_path }}/acme_account_privkey.pem
+    --output={{ tls_cert_path }}/acme_account_privkey.vault.yml
+  args:
+    chdir: "{{ tls_cert_path}}/.."
+    creates: "{{ tls_cert_path }}/acme_account_privkey.vault.yml"
+
+- name: Unencrypted ACME account key is absent.
+  file:
+    path: "{{ tls_cert_path }}/acme_account_privkey.pem"
+    state: absent
