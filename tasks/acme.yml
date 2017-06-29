@@ -56,3 +56,15 @@
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
+- name: Cleanup local challenge file
+  file:
+    path: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
+    state: absent
+  with_items: "{{ tls_cert_acme_challenge.results }}"
+  when: item.item.type == "acme"
+
+- name: Cleanup remote challenge file
+  local_action: >
+    command ssh {{ item.item.dest_host }} rm {{ item.item.dest_acme_challenge_dir }}/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}
+  with_items: "{{ tls_cert_acme_challenge.results }}"
+  when: item.item.type == "acme"
