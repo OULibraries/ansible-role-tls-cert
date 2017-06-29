@@ -13,7 +13,7 @@
      -keyout {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
      -out {{ tls_cert_path }}/{{ item.common_name }}/request.csr
   args:
-    creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.*"
   with_items: "{{ tls_certificates }}"
   environment:
     TLS_CERT_C: "{{ tls_cert_country }}"

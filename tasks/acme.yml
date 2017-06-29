@@ -4,7 +4,7 @@
   command: >
     openssl genrsa -out "{{ tls_cert_path }}"/acme_account_privkey.pem
   args:
-    creates: "{{ tls_cert_path }}/acme_account_privkey.pem"
+    creates: "{{ tls_cert_path }}/acme_account_privkey.*"
 
 - name: Local ACME challenge directory exists
   file:
