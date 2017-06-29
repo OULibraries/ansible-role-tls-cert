@@ -40,10 +40,8 @@
   when: item.item.type == "acme"
 
 - name: Push challenge to web server
-  synchronize:
-    mode: push
-    src: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
-    dest: "rsync://{{ item.item.dest_host }}/{{ item.item.dest_acme_challenge_dir }}"
+  local_action: >
+    command rsync {{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }} {{ item.item.dest_host }}:{{ item.item.dest_acme_challenge_dir }}/.well-known/acme-challenge
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
