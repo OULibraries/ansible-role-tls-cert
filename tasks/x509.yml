@@ -2,7 +2,7 @@
 
 - name: Unencrypted TLS key exists.
   command: >
-    ansible-vault dencrypt
+    ansible-vault decrypt
     {{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
     --output={{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
   args:
