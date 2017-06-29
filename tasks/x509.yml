@@ -1,5 +1,15 @@
 ---
 
+- name: Unencrypted TLS key exists.
+  command: >
+    ansible-vault dencrypt
+    {{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
+    --output={{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
+  args:
+    chdir: "{{ tls_cert_path}}/.."
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
+  with_items: "{{ tls_certificates }}"
+
 - name: Self-signed TLS key exists.
   shell: >
      openssl x509 -req
@@ -10,3 +20,9 @@
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
   with_items: "{{ tls_certificates }}"
   when: item.type == "self-signed"
+
+- name: Unencrypted TLS key is absent.
+  file:
+    path: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
+    state: absent
+  with_items: "{{ tls_certificates }}"

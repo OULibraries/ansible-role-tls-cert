@@ -22,7 +22,7 @@
     TLS_CERT_O: "{{ tls_cert_organization }}"
     TLS_CERT_OU: "{{ tls_cert_department }}"
 
-- name: Encrypt TLS key.
+- name: Encrypted TLS key exists.
   command: >
     ansible-vault encrypt
     {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
@@ -30,4 +30,10 @@
   args:
     chdir: "{{ tls_cert_path}}/.."
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml"
+  with_items: "{{ tls_certificates }}"
+
+- name: Unencrypted TLS key is absent.
+  file:
+    path: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
+    state: absent
   with_items: "{{ tls_certificates }}"
