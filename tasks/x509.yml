@@ -9,6 +9,7 @@
     chdir: "{{ tls_cert_path}}/.."
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
   with_items: "{{ tls_certificates }}"
+  when: item.type == "self-signed"
 
 - name: Self-signed TLS key exists.
   shell: >
@@ -26,3 +27,4 @@
     path: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
     state: absent
   with_items: "{{ tls_certificates }}"
+  when: item.type == "self-signed"
