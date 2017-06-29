@@ -8,8 +8,9 @@
 
 - name: Local ACME challenge directory exists
   file:
-    path: "{{ tls_cert_path }}/{{ item.common_name }}/acme-challenge"
+    path: "{{ tls_cert_path }}/{{ item.common_name }}/acme/.well-known/acme-challenge"
     state: directory
+    recurse: yes
   with_items: "{{ tls_certificates }}"
   when: item.type == "acme"
 
@@ -26,27 +27,24 @@
 
 - debug:
     msg: >
-      "{{ item.challenge_data. }}"
+      "{{ item['challenge_data'][item.item.common_name]['http-01']['resource_value'] }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
 - name: Create challenge file
   copy:
-    dest: "{{ tls_cert_acme_challenge_local_file_name }}"
-    content: "{{ tls_cert_acme_challenge_file_content }}"
+    dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
+    content: "{{ item['challenge_data'][item.item.common_name]['http-01']['resource_value'] }}"
     mode: 0644
-  vars:
-    challenge_local_file_name: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme-challenge/{{ item['challenge_data'][0]['http-01']['resource'] }}"
-    challenge_file_content: "{{ item['challenge_data'][0]['http-01']['resource_value'] }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
 - name: Push challenge to web server
   synchronize:
     mode: push
-    src: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme-challenge/{{ item['challenge_data'][0]['http-01']['resource'] }}"
+    src: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
     dest: "rsync://{{ item.item.dest_host }}/{{ item.item.dest_acme_challenge_dir }}"
-  with_items: "{{ tls_certificates }}"
+  with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
 - name: Respond to challenge and fetch certs
@@ -57,6 +55,6 @@
     csr: "{{ tls_cert_path }}/{{ item.item.common_name }}/request.csr"
     dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/fullchain.pem"
     data: "{{ tls_cert_acme_challenge }}"
-  with_items: "{{ tls_certificates }}"
+  with_items: "{{ tls_cert_acme_challenge.results }}"
   when: item.item.type == "acme"
 
