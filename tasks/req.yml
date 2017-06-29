@@ -21,3 +21,13 @@
     TLS_CERT_L: "{{ tls_cert_locality }}"
     TLS_CERT_O: "{{ tls_cert_organization }}"
     TLS_CERT_OU: "{{ tls_cert_department }}"
+
+- name: Encrypt TLS key.
+  command: >
+    ansible-vault encrypt
+    {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
+    --output={{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
+  args:
+    chdir: "{{ tls_cert_path}}/.."
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml"
+  with_items: "{{ tls_certificates }}"

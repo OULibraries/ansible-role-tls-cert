@@ -7,6 +7,6 @@
      -signkey "{{ tls_cert_path }}"/"{{ item.common_name }}"/privkey.pem
      -out "{{ tls_cert_path }}"/"{{ item.common_name }}"/fullchain.pem
   args:
-    creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.*"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
   with_items: "{{ tls_certificates }}"
   when: item.type == "self-signed"
