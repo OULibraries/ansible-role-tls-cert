@@ -52,9 +52,9 @@
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ item.item.common_name }}/request.csr"
     dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/fullchain.pem"
-    data: "{{ tls_cert_acme_challenge }}"
+    data: "{{ item }}"
   with_items: "{{ tls_cert_acme_challenge.results }}"
-  when: item.item.type == "acme"
+  when: item.item.type == "acme" and item|changed
 
 - name: Cleanup local challenge file
   file:
