@@ -62,6 +62,7 @@ Requirements
 
 * python >= 2.6
 * openssl
+* ansible with ansible-vault
 
 Role Variables
 --------------
@@ -102,6 +103,23 @@ Example Playbook
 ----------------
 
 TBD
+
+Troubleshooting
+---------------
+It can sometimes be useful to use openssl to examine your certificates and CSRs
+to verify that you're getting what you request, especially with SANs.
+
+Here's an example of checking the info on a CSR for localhost.
+
+```
+openssl req -text -noout -in tls_certs/localhost/fullchain.pem
+```
+Here's an example of checking the info on a certificate for localhost.
+
+```
+openssl x509 -text -noout -in tls_certs/localhost/fullchain.pem
+```
+
 
 License
 -------
