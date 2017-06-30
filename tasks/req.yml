@@ -8,7 +8,7 @@
 
 - name: TLS key and CSR exist.
   shell: >
-     TLS_CERT_CN={{ item.common_name }} {% if item.alt_names is defined %}TLS_CERT_SAN={{ item.alt_names }}{% endif %}
+     TLS_CERT_CN={{ item.common_name }} {% if item.alt_names is defined %}TLS_CERT_SAN="{{ item.alt_names }}"{% endif %}
      openssl req -config {{ tls_cert_path }}/openssl.cnf -new -newkey rsa -nodes
      -keyout {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
      -out {{ tls_cert_path }}/{{ item.common_name }}/request.csr
