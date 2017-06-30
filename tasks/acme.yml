@@ -35,6 +35,13 @@
   with_items: "{{ tls_certificates }}"
   when: item.type == "acme"
 
+- debug:
+    msg: >
+      {{ item['challenge_data'].keys()}}
+  with_items:
+    - "{{ tls_cert_acme_challenge.results }}"
+  when: item.item.type == "acme" and item|changed
+
 - name: Create challenge file
   copy:
     dest: "{{ tls_cert_path }}/{{ item.item.common_name }}/acme/{{ item['challenge_data'][item.item.common_name]['http-01']['resource'] }}"
