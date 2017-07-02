@@ -1,0 +1,37 @@
+---
+
+- debug:
+    msg: |
+      {{ acme_challenge }}
+
+- name: Create challenge file
+  copy:
+    dest: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/acme/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}"
+    content: "{{ acme_challenge['challenge_data'][item]['http-01']['resource_value'] }}"
+    mode: 0644
+  with_items: "{{ acme_challenge['challenge_data'].keys() }}"
+
+- name: Push challenge to web server
+  local_action: >
+    command rsync {{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/acme/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }} {{ acme_challenge.item.dest_host }}:{{ acme_challenge.item.dest_acme_challenge_dir }}/.well-known/acme-challenge
+  with_items: "{{ acme_challenge['challenge_data'].keys() }}"
+
+- name: Respond to challenge and fetch certs
+  letsencrypt:
+    acme_directory: "{{ tls_cert_acme_directory }}"
+    account_email: "{{ tls_cert_acme_account_email }}"
+    account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
+    csr: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/request.csr"
+    dest: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/fullchain.pem"
+    data: "{{ acme_challenge }}"
+
+- name: Cleanup local challenge file
+  file:
+    path: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/acme/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}"
+    state: absent
+  with_items: "{{ acme_challenge['challenge_data'].keys() }}"
+
+- name: Cleanup remote challenge file
+  local_action: >
+    command ssh {{ acme_challenge.item.dest_host }} rm {{ acme_challenge.item.dest_acme_challenge_dir }}/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}
+  with_items: "{{ acme_challenge['challenge_data'].keys() }}"
