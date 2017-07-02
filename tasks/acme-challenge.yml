@@ -18,7 +18,7 @@
 
 - name: Respond to challenge and fetch certs
   letsencrypt:
-    acme_directory: "{{ tls_cert_acme_directory }}"
+    acme_directory: "{{ acme_challenge.acme_dir | default(tls_cert_acme_directory) }}"
     account_email: "{{ tls_cert_acme_account_email }}"
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/request.csr"
