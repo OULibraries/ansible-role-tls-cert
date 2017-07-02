@@ -1,9 +1,5 @@
 ---
 
-- debug:
-    msg: |
-      {{ acme_challenge }}
-
 - name: Create challenge file
   copy:
     dest: "{{ tls_cert_path }}/{{ acme_challenge.item.common_name }}/acme/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}"
