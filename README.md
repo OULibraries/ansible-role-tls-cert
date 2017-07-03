@@ -62,7 +62,7 @@ Requirements
 
 * python >= 2.6
 * openssl
-* ansible with ansible-vault
+* ansible >= 2.2
 
 Role Variables
 --------------
