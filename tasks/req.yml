@@ -4,17 +4,27 @@
   file:
     path: "{{ tls_cert_path }}/{{ item.common_name }}"
     state: directory
-  with_items: "{{ tls_certificates }}"
+
+- name: copy openssl.cnf
+  template:
+    src: openssl.cnf.j2
+    dest: "{{ tls_cert_path }}/{{ item.common_name }}/openssl.cnf"
 
 - name: TLS key and CSR exist.
   shell: >
-     TLS_CERT_CN={{ item.common_name }} {% if item.alt_names is defined %}TLS_CERT_SAN="{{ item.alt_names }}"{% endif %}
-     openssl req -config {{ tls_cert_path }}/openssl.cnf -new -newkey rsa -nodes
+     TLS_CERT_CN={{ item.common_name }}
+     {% if ((item.alt_names is defined) and (item.alt_names is not none)) %}
+     TLS_CERT_SAN="
+     {% for alt_name in item.alt_names %}
+     {% if ((alt_name is defined) and (alt_name is not none)) %}
+     DNS:{{ alt_name }}{{ "," if not loop.last else "" }}
+     {% endif %}{% endfor %}"{% else %}
+     {% endif %}
+     openssl req -config {{ tls_cert_path }}/{{ item.common_name }}/openssl.cnf -new -newkey rsa -nodes
      -keyout {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
      -out {{ tls_cert_path }}/{{ item.common_name }}/request.csr
   args:
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.*"
-  with_items: "{{ tls_certificates }}"
   environment:
     TLS_CERT_C: "{{ tls_cert_country }}"
     TLC_CERT_ST: "{{ tls_cert_state }}"
@@ -30,10 +40,8 @@
   args:
     chdir: "{{ tls_cert_path}}/.."
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml"
-  with_items: "{{ tls_certificates }}"
 
 - name: Unencrypted TLS key is absent.
   file:
     path: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
     state: absent
-  with_items: "{{ tls_certificates }}"

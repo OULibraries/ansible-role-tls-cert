@@ -8,31 +8,35 @@
   args:
     chdir: "{{ tls_cert_path}}/.."
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
-  with_items: "{{ tls_certificates }}"
   when: item.type == "self-signed"
 
 - name: Self-signed TLS key exists.
   shell: >
-     TLS_CERT_CN={{ item.common_name }} {% if item.alt_names is defined %}TLS_CERT_SAN="{{ item.alt_names }}"{% endif %}
+     TLS_CERT_CN={{ item.common_name }}
+     {% if ((item.alt_names is defined) and (item.alt_names is not none)) %}
+     TLS_CERT_SAN="
+     {% for alt_name in item.alt_names %}
+     {% if ((alt_name is defined) and (alt_name is not none)) %}
+     DNS:{{ alt_name }}{{ "," if not loop.last else "" }}
+     {% endif %}{% endfor %}"{% else %}
+     {% endif %}
      openssl x509 -req -extensions v3_req
-     -extfile {{ tls_cert_path }}/openssl.cnf
+     -extfile {{ tls_cert_path }}/{{ item.common_name }}/openssl.cnf
      -in "{{ tls_cert_path }}"/"{{ item.common_name }}"/request.csr
      -signkey "{{ tls_cert_path }}"/"{{ item.common_name }}"/privkey.pem
      -out "{{ tls_cert_path }}"/"{{ item.common_name }}"/fullchain.pem
   args:
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
-  with_items: "{{ tls_certificates }}"
-  when: item.type == "self-signed"
   environment:
     TLS_CERT_C: "{{ tls_cert_country }}"
     TLC_CERT_ST: "{{ tls_cert_state }}"
     TLS_CERT_L: "{{ tls_cert_locality }}"
     TLS_CERT_O: "{{ tls_cert_organization }}"
     TLS_CERT_OU: "{{ tls_cert_department }}"
+  when: item.type == "self-signed"
 
 - name: Unencrypted TLS key is absent.
   file:
     path: "{{ tls_cert_path }}/{{ item.common_name }}/privkey.pem"
     state: absent
-  with_items: "{{ tls_certificates }}"
   when: item.type == "self-signed"

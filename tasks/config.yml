@@ -5,8 +5,3 @@
     path: "{{ tls_cert_path }}"
     state: directory
     recurse: yes
-
-- name: copy openssl.cnf
-  copy:
-    src: openssl.cnf
-    dest: "{{ tls_cert_path }}/openssl.cnf"

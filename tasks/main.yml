@@ -14,10 +14,12 @@
 - include: req.yml
   tags:
   - tls_cert_req
+  with_items: "{{ tls_certificates }}"
 
 - include: x509.yml
   tags:
   - tls_cert_x509
+  with_items: "{{ tls_certificates }}"
 
 - include: acme.yml
   tags:

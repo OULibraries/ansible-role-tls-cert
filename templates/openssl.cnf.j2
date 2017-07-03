@@ -16,4 +16,6 @@ CN = ${ENV::TLS_CERT_CN}
 [v3_req]
 basicConstraints = CA:false
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+{% if ((item.alt_names is defined) and (item.alt_names is not none)) %}
 subjectAltName = ${ENV::TLS_CERT_SAN}
+{% endif %}

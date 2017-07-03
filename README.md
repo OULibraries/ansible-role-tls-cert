@@ -81,14 +81,19 @@ tls_cert_acme_account_email: specifically for acme cert handling
 tls_certificates:
   - common_name: localhost
     type: self-signed
-    alt_names: 'DNS:localhost.localdomain,DNS:vagrant.localdomain'
+    alt_names:
+      - localhost.localdomain
+      - vagrant.localdomain
   - common_name: yoursite.example.com
     type: olde-style
-    alt_names: 'DNS:*.yoursite.example.com'
+    alt_names:
+      - "*.yoursite.example.com"
   - common_name: freecerts.example.com
     type: acme
     acme_dir: 'https://acme-staging.api.letsencrypt.org/directory'
-    alt_names: 'DNS:freecerts1.example.com,DNS:freecerts2.example.com'
+    alt_names:
+      - freecerts1.example.com
+      - freecerts2.example.com
     dest_host: 'ssh-accessible.from.your.shell.example.com'
     dest_acme_challenge_dir: '/srv/certbot' # or wherever your acme challenge dir lives
 ```
