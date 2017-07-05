@@ -11,6 +11,10 @@
   tags:
   - tls_cert_config
 
+- include: dhparam.yml
+  tags:
+  - tls_cert_dhparam
+
 - include: req.yml
   tags:
   - tls_cert_req

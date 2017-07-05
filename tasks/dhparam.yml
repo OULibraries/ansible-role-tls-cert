@@ -1,0 +1,21 @@
+---
+
+- name: Diffie Hellman ephemeral parameters
+  command: openssl dhparam -out dhparam.pem 4096
+  args:
+    chdir: "{{ tls_cert_path }}"
+    creates: "{{ tls_cert_path }}/dhparam.*"
+
+- name: Encrypted Diffie Hellman ephemeral parameters exists.
+  command: >
+    ansible-vault encrypt
+    {{ tls_cert_path }}/dhparam.pem
+    --output={{ tls_cert_path }}/dhparam.vault.yml
+  args:
+    chdir: "{{ tls_cert_path}}/.."
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/dhparam.vault.yml"
+
+- name: Unencrypted Diffie Hellman ephemeral parameters absent.
+  file:
+    path: "{{ tls_cert_path }}/dhparam.pem"
+    state: absent
