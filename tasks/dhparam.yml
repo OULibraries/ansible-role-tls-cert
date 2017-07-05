@@ -12,8 +12,8 @@
     {{ tls_cert_path }}/dhparam.pem
     --output={{ tls_cert_path }}/dhparam.vault.yml
   args:
-    chdir: "{{ tls_cert_path}}/.."
-    creates: "{{ tls_cert_path }}/{{ item.common_name }}/dhparam.vault.yml"
+    chdir: "{{ tls_cert_path }}/.."
+    creates: "{{ tls_cert_path }}/dhparam.vault.yml"
 
 - name: Unencrypted Diffie Hellman ephemeral parameters absent.
   file:
