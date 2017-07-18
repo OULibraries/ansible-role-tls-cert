@@ -17,7 +17,17 @@
   register: tls_cert_ca_issuer_uri
   when: "{{ tls_cert_certstat.stat.exists | default(false) }}"
 
-- debug:
-    msg: >
-      {{ tls_cert_ca_issuer_uri.stdout_lines }}
-  when: "{{ tls_cert_ca_issuer_uri.stdout_lines | default(false) }}"
+- include: chain-issuers.yml
+  with_indexed_items:
+    - "{{ tls_cert_ca_issuer_uri.stdout_lines }}"
+  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
+  loop_control:
+    loop_var: issuer_uri
+  tags:
+  - tls_cert_chain
+  - tls_cert_chain_issuers
+
+#- debug:
+#    msg: >
+#      {{ tls_cert_ca_issuer_uri.stdout_lines }}
+#  when: "{{ tls_cert_ca_issuer_uri.stdout_lines | default(false) }}"

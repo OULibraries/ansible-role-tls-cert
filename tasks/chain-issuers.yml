@@ -1,0 +1,30 @@
+---
+
+- name: Download CA issuer certificate
+  get_url:
+    url: "{{ issuer_uri.1 }}"
+    dest: "{{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.crt"
+
+- name: Convert issuer certificate from DER to PEM.
+  shell: >
+     openssl x509 -inform DER -in
+     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.crt
+     -outform PEM -out
+     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem
+  args:
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem"
+
+- name: Fetch chained CA issuer URI.
+  shell: >
+     openssl x509 -in
+     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem
+     -text -noout -certopt ca_default,no_validity,no_serial |
+     grep -E '^\s+CA\s+Issuers\s+-\s+URI:' |
+     awk '{print $4}' |
+     sed -e 's/^URI://'
+  changed_when: false
+  register: tls_cert_ca_chained_issuer_uri
+
+- debug:
+    msg: >
+      {{ tls_cert_ca_chained_issuer_uri }}
