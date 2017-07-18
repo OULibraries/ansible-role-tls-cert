@@ -43,6 +43,7 @@
     loop_var:  acme_challenge
   tags:
   - tls_cert_acme
+  when: {{ tls_cert_acme_challenge }}
 
 - name: Encrypted ACME account key exists.
   command: >
