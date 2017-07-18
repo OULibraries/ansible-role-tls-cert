@@ -1,5 +1,10 @@
 ---
 
+- name: Check for certificate
+  stat:
+    path: "{{ tls_cert_path }}/{{ item.common_name }}/cert.pem"
+  register: tls_cert_certstat
+
 - name: Fetch CA issuer URI.
   shell: >
      openssl x509 -in
@@ -8,8 +13,11 @@
      grep -E '^\s+CA\s+Issuers\s+-\s+URI:' |
      awk '{print $4}' |
      sed -e 's/^URI://'
+  changed_when: false
   register: tls_cert_ca_issuer_uri
+  when: "{{ tls_cert_certstat.stat.exists | default(false) }}"
 
 - debug:
     msg: >
-      {{ tls_cert_ca_issuer_uri.results }}
+      {{ tls_cert_ca_issuer_uri.stdout_lines }}
+  when: "{{ tls_cert_ca_issuer_uri.stdout_lines | default(false) }}"
