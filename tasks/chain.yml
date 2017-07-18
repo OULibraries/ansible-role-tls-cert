@@ -11,5 +11,5 @@
   register: tls_cert_ca_issuer_uri
 
 - debug:
-  msg: >
-    {{ tls_cert_ca_issuer_uri.results }}
+    msg: >
+      {{ tls_cert_ca_issuer_uri.results }}
