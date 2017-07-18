@@ -50,6 +50,8 @@ this results in:
 ```
 {{ tls_cert_path }}/acme_account_privkey.vault.yml
 {{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
+{{ tls_cert_path }}/{{ item.common_name }}/cert.pem
+{{ tls_cert_path }}/{{ item.common_name }}/chain.pem
 {{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem
 ```
 

@@ -1,0 +1,15 @@
+---
+
+- name: Fetch CA issuer URI.
+  shell: >
+     openssl x509 -in
+     {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
+     -text -noout -certopt ca_default,no_validity,no_serial |
+     grep -E '^\s+CA\s+Issuers\s+-\s+URI:' |
+     awk '{print $4}' |
+     sed -e 's/^URI://'
+  register: tls_cert_ca_issuer_uri
+
+- debug:
+  msg: >
+    {{ tls_cert_ca_issuer_uri.results }}

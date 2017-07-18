@@ -20,10 +20,11 @@
   - tls_cert_req
   with_items: "{{ tls_certificates }}"
 
-- include: x509.yml
+- include: self-signed.yml
   tags:
-  - tls_cert_x509
+  - tls_cert_self_signed
   with_items: "{{ tls_certificates }}"
+  when: item.type == "self-signed"
 
 - include: acme.yml
   tags:
@@ -34,3 +35,9 @@
   - tls_cert_olde_style
   with_items: "{{ tls_certificates }}"
   when: item.type == "olde-style"
+
+- include: chain.yml
+  tags:
+  - tls_cert_chain
+  with_items: "{{ tls_certificates }}"
+  when: item.type != "self-signed"

@@ -30,7 +30,7 @@
     account_email: "{{ tls_cert_acme_account_email }}"
     account_key: "{{ tls_cert_path }}/acme_account_privkey.pem"
     csr: "{{ tls_cert_path }}/{{ item.common_name }}/request.csr"
-    dest: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
+    dest: "{{ tls_cert_path }}/{{ item.common_name }}/cert.pem"
   register: tls_cert_acme_challenge
   with_items: "{{ tls_certificates }}"
   when: item.type == "acme"
