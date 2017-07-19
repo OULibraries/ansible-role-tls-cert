@@ -29,25 +29,28 @@
 
 - name: Combine chained certificates into chainfile.
   shell: >
-    ls -1 {{ tls_cert_path }}/{{ item.common_name }}/chain.*.pem |
-    xargs cat > {{ tls_cert_path }}/{{ item.common_name }}/chain.pem &&
+    ls -1 chain.*.pem | xargs cat > chain.pem &&
     sed -i 's/-----END CERTIFICATE----------BEGIN CERTIFICATE-----/-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----/' chain.pem
   args:
+    chdir: "{{ tls_cert_path }}/{{ item.common_name }}"
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.pem"
   when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
 - name: Verify certificate chainfile.
   command: >
-     openssl verify -untrusted
-     {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
-     {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
+     openssl verify -untrusted chain.pem cert.pem
+  changed_when: false
+  args:
+    chdir: "{{ tls_cert_path }}/{{ item.common_name }}"
   when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
-- name: Cleanup extraneous files.
-  shell: |
-    find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.pem" | xargs rm
-    find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.crt" | xargs rm
-  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
+#- name: Cleanup extraneous files.
+#  shell: |
+#    find . -type f -name "chain.*.pem" | xargs rm
+#    find . -type f -name "chain.*.crt" | xargs rm
+#  args:
+#    chdir: "{{ tls_cert_path }}/{{ item.common_name }}"
+#  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
 - name: Check for certificate chain
   stat:
