@@ -35,24 +35,22 @@
   loop_control:
     loop_var: chained_issuer_uri
 
+# Don't count asn1 encoding errors as failures, as that probably means that we
+# probably encountered a pkcs7 encoded root certificate, which we don't need to
+# pin in our chainfile anyway.
 - name: Convert chained issuer certificate from DER to PEM.
   shell: >
      openssl x509 -inform DER -in
      {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt
      -outform PEM -out
-     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem ||
-     openssl pkcs7 -inform DER -in
-     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt
-     -outform PEM -print_certs |
-     awk '
-     /^-----BEGIN/, /^-----END/ {print}
-     ' >
      {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem
   args:
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem"
   with_indexed_items:
     - "{{ tls_cert_ca_chained_issuer_uri.stdout_lines }}"
   when: tls_cert_ca_chained_issuer_uri.stdout_lines | default(false)
+  register: tls_cert_ca_chained_issuer_convert
+  failed_when: (tls_cert_ca_chained_issuer_convert.rc > 0) and ('asn1 encoding routines' not in tls_cert_ca_chained_issuer_convert.stderr)
   loop_control:
     loop_var: chained_issuer_uri
 
