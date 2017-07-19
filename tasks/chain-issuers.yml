@@ -43,7 +43,10 @@
      {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem ||
      openssl pkcs7 -inform DER -in
      {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt
-     -outform PEM -out
+     -outform PEM -print_certs |
+     awk '
+     /^-----BEGIN/, /^-----END/ {print}
+     ' >
      {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem
   args:
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem"
