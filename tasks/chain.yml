@@ -15,7 +15,7 @@
      sed -e 's/^URI://'
   changed_when: false
   register: tls_cert_ca_issuer_uri
-  when: "{{ tls_cert_certstat.stat.exists | default(false) }}"
+  when: "{{ (tls_cert_certstat.stat.exists and tls_cert_certstat.stat.size > 0) | default(false) }}"
 
 - include: chain-issuers.yml
   with_indexed_items:
@@ -30,22 +30,35 @@
 - name: Combine chained certificates into chainfile.
   shell: >
     ls -1 {{ tls_cert_path }}/{{ item.common_name }}/chain.*.pem |
-    xargs cat > {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
+    xargs cat > {{ tls_cert_path }}/{{ item.common_name }}/chain.pem &&
+    sed -i 's/-----END CERTIFICATE----------BEGIN CERTIFICATE-----/-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----/' chain.pem
   args:
     creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.pem"
+  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
 - name: Verify certificate chainfile.
   command: >
      openssl verify -untrusted
      {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
      {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
+  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
 - name: Cleanup extraneous files.
   shell: |
     find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.pem" | xargs rm
     find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.crt" | xargs rm
+  when: tls_cert_ca_issuer_uri.stdout_lines | default(false)
 
-#- debug:
-#    msg: >
-#      {{ tls_cert_ca_issuer_uri.stdout_lines }}
-#  when: "{{ tls_cert_ca_issuer_uri.stdout_lines | default(false) }}"
+- name: Check for certificate chain
+  stat:
+    path: "{{ tls_cert_path }}/{{ item.common_name }}/chain.pem"
+  register: tls_cert_chainstat
+
+- name: Fullchain exists
+  shell: >
+    cat cert.pem chain.pem >> fullchain.pem &&
+    sed -i 's/-----END CERTIFICATE----------BEGIN CERTIFICATE-----/-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----/' fullchain.pem
+  args:
+    chdir: "{{ tls_cert_path }}/{{ item.common_name }}"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem"
+  when: "{{ (tls_cert_certstat.stat.exists and tls_cert_certstat.stat.size > 0) and (tls_cert_chainstat.stat.exists and tls_cert_chainstat.stat.size > 0) | default(false) }}"

@@ -30,12 +30,6 @@
   tags:
   - tls_cert_acme
 
-- include: olde-style.yml
-  tags:
-  - tls_cert_olde_style
-  with_items: "{{ tls_certificates }}"
-  when: item.type == "olde-style"
-
 - include: chain.yml
   tags:
   - tls_cert_chain
