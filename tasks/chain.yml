@@ -29,7 +29,7 @@
 
 - name: Combine chained certificates into chainfile.
   shell: >
-    ls -1 chain.*.pem | xargs cat > chain.pem &&
+    ls -1r chain.*.pem | xargs cat > chain.pem &&
     sed -i 's/-----END CERTIFICATE----------BEGIN CERTIFICATE-----/-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----/' chain.pem
   args:
     chdir: "{{ tls_cert_path }}/{{ item.common_name }}"
