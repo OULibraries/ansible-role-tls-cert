@@ -27,6 +27,24 @@
   - tls_cert_chain
   - tls_cert_chain_issuers
 
+- name: Combine chained certificates into chainfile.
+  shell: >
+    ls -1 {{ tls_cert_path }}/{{ item.common_name }}/chain.*.pem |
+    xargs cat > {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
+  args:
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.pem"
+
+- name: Verify certificate chainfile.
+  command: >
+     openssl verify -untrusted
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
+     {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
+
+- name: Cleanup extraneous files.
+  shell: |
+    find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.pem" | xargs rm
+    find {{ tls_cert_path }}/{{ item.common_name }} -type f -name "chain.*.crt" | xargs rm
+
 #- debug:
 #    msg: >
 #      {{ tls_cert_ca_issuer_uri.stdout_lines }}

@@ -3,21 +3,21 @@
 - name: Download CA issuer certificate
   get_url:
     url: "{{ issuer_uri.1 }}"
-    dest: "{{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.crt"
+    dest: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.crt"
 
 - name: Convert issuer certificate from DER to PEM.
   shell: >
      openssl x509 -inform DER -in
-     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.crt
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.crt
      -outform PEM -out
-     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.pem
   args:
-    creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem"
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.pem"
 
 - name: Fetch chained CA issuer URI.
   shell: >
      openssl x509 -in
-     {{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.pem
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.pem
      -text -noout -certopt ca_default,no_validity,no_serial |
      grep -E '^\s+CA\s+Issuers\s+-\s+URI:' |
      awk '{print $4}' |
@@ -28,7 +28,25 @@
 - name: Download chained CA issuer certificate
   get_url:
     url: "{{ chained_issuer_uri.1 }}"
-    dest: "{{ tls_cert_path }}/{{ item.common_name }}/chain{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt"
+    dest: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt"
+  with_indexed_items:
+    - "{{ tls_cert_ca_chained_issuer_uri.stdout_lines }}"
+  when: tls_cert_ca_chained_issuer_uri.stdout_lines | default(false)
+  loop_control:
+    loop_var: chained_issuer_uri
+
+- name: Convert chained issuer certificate from DER to PEM.
+  shell: >
+     openssl x509 -inform DER -in
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt
+     -outform PEM -out
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem ||
+     openssl pkcs7 -inform DER -in
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.crt
+     -outform PEM -out
+     {{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem
+  args:
+    creates: "{{ tls_cert_path }}/{{ item.common_name }}/chain.{{ issuer_uri.0 }}.{{ chained_issuer_uri.0 }}.pem"
   with_indexed_items:
     - "{{ tls_cert_ca_chained_issuer_uri.stdout_lines }}"
   when: tls_cert_ca_chained_issuer_uri.stdout_lines | default(false)
