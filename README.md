@@ -21,19 +21,12 @@ Everybody gets
 {{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem
 ```
 
-* olde-style expects you to get place the signed cert and an intermediate cert like so:
+* olde-style expects you to place the leaf cert like so:
 ```
 {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
-{{ tls_cert_path }}/{{ item.common_name }}/chain.pem
 ```
 
-and then rerun the role. It will concatenate the full chain, resulting in:
-```
-{{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
-{{ tls_cert_path }}/{{ item.common_name }}/cert.pem
-{{ tls_cert_path }}/{{ item.common_name }}/chain.pem
-{{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem
-```
+and then rerun the role to generate the chain files.
 
 * acme expects you to have a remote server already configured to:
   1.  serve out an acme challenge from the specified hostname on port 80
@@ -46,18 +39,33 @@ and then rerun the role. It will concatenate the full chain, resulting in:
   4. respond to the challenge
   5. write out the certificate
 
-this results in:
+By default it points to the letsencrypt staging infrastructure,
+so you'll probably want to point it at something that will actually
+sign certs for you.
+
+tls-cert uses the same process to generate chainfiles for acme and old-style
+certificates.
+
+It will follow the chain of trust from the leaf cert
+and download each intermediate along the way. It will then convert each
+intermediate certificate to pem-formatted file. It will then concatenate
+the intermediate certificates into a chain file. It will then concatenate the
+chain file and the leaf certificate into a full chain, resulting in the
+follwing files of immediate interest:
 ```
-{{ tls_cert_path }}/acme_account_privkey.vault.yml
 {{ tls_cert_path }}/{{ item.common_name }}/privkey.vault.yml
 {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
 {{ tls_cert_path }}/{{ item.common_name }}/chain.pem
 {{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem
 ```
 
-By default it points to the letsencrypt staging infrastructure,
-so you'll probably want to point it at something that will actually
-sign certs for you.
+It also leaves some less-interesting artifacts that we don't clean out because
+their presence allows ansible to skip multiple steps that would be executed for
+each certificate on every run.
+```
+{{ tls_cert_path }}/{{ item.common_name }}/chain.*.crt
+{{ tls_cert_path }}/{{ item.common_name }}/chain.*.pem
+```
 
 Requirements
 ------------
