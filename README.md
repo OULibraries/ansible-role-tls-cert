@@ -16,12 +16,12 @@ Everybody gets
 {{ tls_cert_path }}/{{ item.common_name }}/request.csr
 ```
 
-* self-signed runs x509 to wrap things up immediately, with a self-signed cert at.
+* self-signed runs x509 to wrap things up immediately, with a self-signed certificate at:
 ```
 {{ tls_cert_path }}/{{ item.common_name }}/fullchain.pem
 ```
 
-* olde-style expects you to place the leaf cert like so:
+* olde-style expects you to place the leaf certificate like so:
 ```
 {{ tls_cert_path }}/{{ item.common_name }}/cert.pem
 ```
@@ -37,11 +37,14 @@ and then rerun the role to generate the chain files.
   2. request a challenge
   3. push the file containing the answer to the remote server
   4. respond to the challenge
-  5. write out the certificate
+  5. write out the leaf certificate
 
 By default it points to the letsencrypt staging infrastructure,
 so you'll probably want to point it at something that will actually
-sign certs for you.
+sign certs for you, such as the letsencrypt production infrastructure:
+```
+https://acme-v01.api.letsencrypt.org/directory
+```
 
 tls-cert uses the same process to generate chainfiles for acme and old-style
 certificates.
