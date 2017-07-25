@@ -38,12 +38,13 @@
 - include: acme-challenge.yml
   with_items:
     - "{{ tls_cert_acme_challenge.results }}"
-  when: acme_challenge.item.type == "acme" and acme_challenge|changed
+  when:
+    - tls_cert_acme_challenge | default(false) 
+    - acme_challenge.item.type == "acme" and acme_challenge|changed
   loop_control:
     loop_var:  acme_challenge
   tags:
   - tls_cert_acme
-  when: "{{ tls_cert_acme_challenge | default(false) }}"
 
 - name: Encrypted ACME account key exists.
   command: >
