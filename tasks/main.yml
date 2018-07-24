@@ -1,35 +1,42 @@
 ---
 # tasks file for tls-cert
 
+# Install  openssl
 - include: yum.yml
   when: (((ansible_distribution == "CentOS") or (ansible_distribution == "RedHat")) and (ansible_distribution_major_version == "7"))
   become: true
   tags:
   - tls_cert_yum
 
+# make tls cert path folder
 - include: config.yml
   tags:
   - tls_cert_config
 
+# We use Diffie Helman key exchange for forward security
 - include: dhparam.yml
   tags:
   - tls_cert_dhparam
 
+# Prep certificate requests and keys
 - include: req.yml
   tags:
   - tls_cert_req
   with_items: "{{ tls_certificates }}"
 
+# Generate self-signed certs
 - include: self-signed.yml
   tags:
   - tls_cert_self_signed
   with_items: "{{ tls_certificates }}"
   when: item.type == "self-signed"
 
+# Generate and upload acme challenge files and request certs
 - include: acme.yml
   tags:
   - tls_cert_acme
 
+# Take certs apart and rebuild them with full chain
 - include: chain.yml
   tags:
   - tls_cert_chain
