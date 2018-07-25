@@ -19,7 +19,7 @@
   file:
     path: "{{ tls_cert_path }}/{{ item.common_name }}/acme/.well-known/acme-challenge"
     state: directory
-    recurse: true
+    recurse: yes
   with_items: "{{ tls_certificates }}"
   when: item.type == "acme"
 
