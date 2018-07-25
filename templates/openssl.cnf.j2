@@ -6,16 +6,24 @@ req_extensions = v3_req
 prompt = no
 
 [req_distinguished_name]
-C = ${ENV::TLS_CERT_C}
-ST = ${ENV::TLC_CERT_ST}
-L = ${ENV::TLS_CERT_L}
-O = ${ENV::TLS_CERT_O}
-OU = ${ENV::TLS_CERT_OU}
-CN = ${ENV::TLS_CERT_CN}
+countryName =  {{ tls_cert_country }}
+stateOrProvinceName =  {{tls_cert_state }}
+localityName =  {{tls_cert_locality }}
+organizationName =  {{tls_cert_organization }}
+organizationalUnitName = {{ tls_cert_department }}
+commonName =  {{item.common_name}}
 
 [v3_req]
 basicConstraints = CA:false
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 {% if ((item.alt_names is defined) and (item.alt_names is not none)) %}
-subjectAltName = ${ENV::TLS_CERT_SAN}
+subjectAltName = @alt_names
+{% endif %}
+
+{% if ((item.alt_names is defined) and (item.alt_names is not none)) %}
+[alt_names]
+{% for alt_name in item.alt_names %}
+{% if ((alt_name is defined) and (alt_name is not none)) %}DNS.{{loop.index}} = {{ alt_name }}
+{% endif %}
+{% endfor %}
 {% endif %}

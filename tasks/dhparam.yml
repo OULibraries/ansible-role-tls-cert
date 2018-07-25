@@ -1,11 +1,15 @@
 ---
 
+# We'll use Diffie Hellman key exchange to improve the forward security of
+# communication.  This means the servers private keys are not directly used
+# when encrypting data.
 - name: Diffie Hellman ephemeral parameters
   command: openssl dhparam -out dhparam.pem 4096
   args:
     chdir: "{{ tls_cert_path }}"
     creates: "{{ tls_cert_path }}/dhparam.*"
 
+# Make sure this file is automatically protected by vault.
 - name: Encrypted Diffie Hellman ephemeral parameters exists.
   command: >
     ansible-vault encrypt
