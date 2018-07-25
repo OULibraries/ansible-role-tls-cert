@@ -13,7 +13,7 @@
 - name: TLS key and CSR exist.
   shell: >
      openssl req -new -newkey rsa -nodes
-     -config {{ tls_cert_path }}/{{ item.common_name }}/openssl.cnf 
+     -config {{ tls_cert_path }}/{{ item.common_name }}/openssl.cnf
      -keyout {{ tls_cert_path }}/{{ item.common_name }}/privkey.pem
      -out {{ tls_cert_path }}/{{ item.common_name }}/request.csr
   args:
